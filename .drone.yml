@@ -1,0 +1,24 @@
+kind: pipeline
+type: kubernetes
+name: default
+
+steps:
+- name: helm-lint
+  image: alpine/helm
+  commands:
+  - helm lint helm/node-maintenance
+  - helm package helm/node-maintenance
+
+- name: upload-helm-chart
+  image: alpine
+  environment:
+    GITEA_PASSWORD:
+      from_secret: gitea-password
+  commands:
+  - apk add curl
+  - curl --user zhala:$GITEA_PASSWORD -X POST --upload-file ./node-maintenance-*.tgz https://git.zanelab.com/api/packages/zhala/helm/api/charts
+  when:
+    branch: 
+      - master
+    event:
+      - push

@@ -1,0 +1,43 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: node-maint-cron
+  labels:
+    jobgroup: parallel
+spec:
+  schedule: "0 0 * * 0"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: clean-container-cache
+          labels:
+            jobgroup: parallel
+        spec:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  jobgroup: parallel
+          hostPID: true
+          containers:
+          - name: clean-container-cache
+            image: alpine
+            imagePullPolicy: IfNotPresent
+            command: ['sh', '-c', 'wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.22.0/crictl-v1.22.0-linux-amd64.tar.gz ; tar zxvf crictl-v1.22.0-linux-amd64.tar.gz -C /usr/local/bin ; crictl -r /run/k3s/containerd/containerd.sock rmi --prune']
+            volumeMounts:
+            - mountPath:  /run/k3s/containerd/containerd.sock
+              name: docker-socket
+          volumes:
+          - name: docker-socket
+            hostPath:
+              path: /run/k3s/containerd/containerd.sock
+              type: Socket
+          restartPolicy: OnFailure
+          terminationGracePeriodSeconds: 0
+      parallelism: 4
+  concurrencyPolicy: Allow
