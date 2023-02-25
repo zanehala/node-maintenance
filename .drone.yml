@@ -19,6 +19,6 @@ steps:
   - curl --user zhala:$GITEA_PASSWORD -X POST --upload-file ./node-maintenance-*.tgz https://git.zanelab.com/api/packages/zhala/helm/api/charts
   when:
     branch: 
-      - master
+      - main
     event:
       - push
