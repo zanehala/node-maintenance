@@ -1,3 +1,6 @@
+# Runs a job pod on all nodes that cleans up dangling images.
+# This is set up specifically for k3s, change container runtime and socket to match your cluster
+---
 apiVersion: batch/v1b
 kind: CronJob
 metadata:
@@ -16,6 +19,7 @@ spec:
           labels:
             jobgroup: parallel
         spec:
+	  # Forces pod spread to 1 per node
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
@@ -39,5 +43,6 @@ spec:
               type: Socket
           restartPolicy: OnFailure
           terminationGracePeriodSeconds: 0
+      # Set parallelism to the number of nodes
       parallelism: 4
   concurrencyPolicy: Allow
