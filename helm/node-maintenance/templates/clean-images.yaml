@@ -19,8 +19,8 @@ spec:
           labels:
             jobgroup: parallel
         spec:
-	  # Forces pod spread to 1 per node
           topologySpreadConstraints:
+            {{/* Forces pod spread to 1 per node */}}
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
@@ -43,6 +43,6 @@ spec:
               type: Socket
           restartPolicy: OnFailure
           terminationGracePeriodSeconds: 0
-      # Set parallelism to the number of nodes
+      {{/* Set parallelism to the number of nodes */}}
       parallelism: 4
   concurrencyPolicy: Allow
