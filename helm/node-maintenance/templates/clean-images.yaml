@@ -1,7 +1,7 @@
 # Runs a job pod on all nodes that cleans up dangling images.
 # This is set up specifically for k3s, change container runtime and socket to match your cluster
 ---
-apiVersion: batch/v1b
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: node-maint-cron
